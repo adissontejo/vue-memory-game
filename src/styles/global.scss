@@ -1,0 +1,23 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+
+  font-family: 'Caveat', cursive;
+}
+
+body {
+  width: 100vw;
+  height: 100vh;
+  background: $accent-color;
+
+  font-size: 24px;
+}
+
+button {
+  border: none;
+}
+
+a {
+  text-decoration: none;
+}
