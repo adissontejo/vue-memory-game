@@ -1,3 +1,44 @@
+<script lang="ts">
+import { defineComponent } from 'vue';
+
+import image from '@/assets/question-mark.svg';
+
+export default defineComponent({
+  name: 'Card',
+
+  props: {
+    shown: Boolean,
+    color: String,
+  },
+
+  data() {
+    return {
+      image,
+    };
+  },
+
+  computed: {
+    frontStyle() {
+      return {
+        backgroundColor: this.color,
+      };
+    },
+  },
+});
+</script>
+
+<template>
+  <button class="card">
+    <div class="front" :class="{ hidden: !shown }" :style="frontStyle"></div>
+    <div class="back" :class="{ hidden: shown }">
+      <div>
+        <img :src="image" />
+      </div>
+    </div>
+  </button>
+</template>
+
+<style lang="scss" scoped>
 .card {
   position: relative;
 
@@ -27,7 +68,7 @@
   > div {
     width: 100%;
     height: 100%;
-    border: 1px solid #ffd782;
+    border: 1px solid $accent-color;
     border-radius: 10px;
 
     display: flex;
@@ -64,3 +105,4 @@
 .back:not(.hidden) {
   transform: rotateY(360deg);
 }
+</style>

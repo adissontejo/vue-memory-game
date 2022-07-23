@@ -1,1 +1,2 @@
-export * from './getRandomColor';
+export * from './getMemoryCardsList';
+export * from './getRandom';

@@ -8,17 +8,8 @@ module.exports = defineConfig({
   css: {
     loaderOptions: {
       sass: {
-        additionalData: `@import "~/styles/variables.scss";`,
+        additionalData: `@import "~@/styles/variables.scss";`,
       },
-    },
-  },
-
-  configureWebpack: {
-    resolve: {
-      alias: {
-        '~': path.resolve(__dirname, './src'),
-      },
-      extensions: ['.js', '.ts'],
     },
   },
 });

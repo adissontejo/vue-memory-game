@@ -9,13 +9,14 @@
 body {
   width: 100vw;
   height: 100vh;
-  background: $accent-color;
+  background: $background-color;
 
   font-size: 24px;
 }
 
 button {
   border: none;
+  background: transparent;
 }
 
 a {

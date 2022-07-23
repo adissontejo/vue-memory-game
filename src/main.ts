@@ -1,5 +1,5 @@
 import { createApp } from 'vue';
 
-import { App } from './pages';
+import { Home } from './pages';
 
-createApp(App).mount('#app');
+createApp(Home).mount('#app');
