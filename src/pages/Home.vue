@@ -16,9 +16,44 @@ export default defineComponent({
     return {
       cards: cards.map(item => ({
         color: item,
-        shown: false,
+        found: false,
       })),
+      selected: [] as number[],
     };
+  },
+
+  computed: {
+    cardShown(): boolean[] {
+      return this.cards.map((card, index) => {
+        return this.selected.some(item => item === index) || card.found;
+      });
+    },
+  },
+
+  methods: {
+    selectCard(index: number) {
+      if (this.cardShown[index] || this.selected.length === 2) {
+        return;
+      }
+
+      this.selected.push(index);
+
+      if (this.selected.length === 2) {
+        const cardA = this.cards[this.selected[0]];
+        const cardB = this.cards[this.selected[1]];
+
+        if (cardA.color !== cardB.color) {
+          setTimeout(() => {
+            this.selected = [];
+          }, 1000);
+        } else {
+          cardA.found = true;
+          cardB.found = true;
+
+          this.selected = [];
+        }
+      }
+    },
   },
 });
 </script>
@@ -31,8 +66,8 @@ export default defineComponent({
         v-for="(card, index) in cards"
         :key="index"
         :color="card.color"
-        :shown="card.shown"
-        @click="card.shown = !card.shown"
+        :shown="cardShown[index]"
+        @click="selectCard(index)"
       />
     </main>
   </div>
