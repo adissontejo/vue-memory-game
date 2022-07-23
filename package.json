@@ -10,9 +10,12 @@
   "dependencies": {
     "@mdi/font": "5.9.55",
     "core-js": "^3.8.3",
-    "vue": "^3.2.13"
+    "firebase": "^9.9.1",
+    "vue": "^3.2.13",
+    "vuex": "^4.0.2"
   },
   "devDependencies": {
+    "@types/firebase": "^3.2.1",
     "@typescript-eslint/eslint-plugin": "^5.4.0",
     "@typescript-eslint/parser": "^5.4.0",
     "@vue/cli-plugin-babel": "~5.0.0",
