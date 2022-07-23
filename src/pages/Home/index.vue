@@ -1,5 +1,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { useRouter } from 'vue-router';
 
 import startImg from '@/assets/start.svg';
 import friendsImg from '@/assets/friends.svg';
@@ -15,13 +16,18 @@ export default defineComponent({
   },
 
   setup() {
+    const router = useRouter();
     const { dispatch } = useStore();
+
+    const startGame = () => {
+      router.push({ name: 'game' });
+    };
 
     const createGame = () => {
       dispatch('createGame', 'Adisson');
     };
 
-    return { startImg, friendsImg, createGame };
+    return { startImg, friendsImg, startGame, createGame };
   },
 });
 </script>
@@ -31,7 +37,7 @@ export default defineComponent({
     <main>
       <div class="wrapper">
         <h1>Memory Game</h1>
-        <NButton :src="startImg">Start</NButton>
+        <NButton :src="startImg" @click="startGame">Start</NButton>
         <NButton :src="friendsImg" @click="createGame">
           Play with friends
         </NButton>
@@ -40,5 +46,4 @@ export default defineComponent({
   </div>
 </template>
 
-<style lang="scss" src="@/styles/global.scss" />
 <style lang="scss" scoped src="./styles.scss" />

@@ -1,9 +1,12 @@
 import { createApp } from 'vue';
 
-import { Home } from './pages';
 import { key, store } from './store';
+import { router } from './router';
+import App from './App.vue';
 
-const app = createApp(Home);
+const app = createApp(App);
+
+app.use(router);
 
 app.use(store, key);
 

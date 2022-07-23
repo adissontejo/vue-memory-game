@@ -4,6 +4,7 @@ import { computed, toRefs } from '@vue/reactivity';
 
 import { NCard } from '@/components';
 import { getMemoryCardsList } from '@/utils';
+import { useRouter } from 'vue-router';
 
 const cards = getMemoryCardsList();
 
@@ -15,6 +16,8 @@ export default defineComponent({
   },
 
   setup() {
+    const router = useRouter();
+
     const state = reactive({
       cards: cards.map(item => ({
         color: item,
@@ -28,6 +31,10 @@ export default defineComponent({
         return state.selected.some(item => item === index) || card.found;
       });
     });
+
+    const goHome = () => {
+      router.push('/');
+    };
 
     const selectCard = (index: number) => {
       if (cardShown.value[index] || state.selected.length === 2) {
@@ -56,6 +63,7 @@ export default defineComponent({
     return {
       ...state,
       cardShown,
+      goHome,
       selectCard,
     };
   },
@@ -64,7 +72,7 @@ export default defineComponent({
 
 <template>
   <div class="home">
-    <h1>Memory Game</h1>
+    <h1 @click="goHome">Memory Game</h1>
     <main>
       <NCard
         v-for="(card, index) in cards"
@@ -74,20 +82,7 @@ export default defineComponent({
         @click="selectCard(index)"
       />
     </main>
-    <aside>
-      <table>
-        <tr>
-          <th>Players</th>
-          <th>Score</th>
-        </tr>
-        <tr>
-          <td>Adisson</td>
-          <td>3</td>
-        </tr>
-      </table>
-    </aside>
   </div>
 </template>
 
-<style lang="scss" src="@/styles/global.scss" />
 <style lang="scss" scoped src="./styles.scss" />

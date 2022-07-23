@@ -3,15 +3,14 @@
 
   width: 100vw;
 
-  display: grid;
-  grid:
-    'title title' auto
-    'main aside' 1fr
-    / 1fr auto;
+  display: flex;
+  flex-direction: column;
   gap: 40px;
 
   > h1 {
     grid-area: title;
+
+    cursor: pointer;
 
     text-align: center;
   }
@@ -29,27 +28,6 @@
     &::after {
       content: '';
       flex: 1;
-    }
-  }
-
-  > aside {
-    grid-area: aside;
-
-    padding: 0 20px 0 0;
-
-    > table {
-      border-spacing: 0;
-      border-collapse: collapse;
-      border-radius: 100%;
-
-      th,
-      td {
-        width: 100px;
-        border: 1px solid white;
-        border-radius: 50px;
-
-        text-align: center;
-      }
     }
   }
 }
