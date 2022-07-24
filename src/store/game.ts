@@ -11,7 +11,9 @@ export const useGameStore = defineStore('game', {
   state: () => ({
     id: '',
     players: [] as Player[],
-    player: {} as Player,
+    player: {} as Player & {
+      created?: boolean;
+    },
   }),
 
   getters: {},
@@ -29,6 +31,7 @@ export const useGameStore = defineStore('game', {
         id: creatorId,
         name: creatorName,
         score: 0,
+        created: true,
       };
 
       onPlayerJoined(gameId, player => {
@@ -46,6 +49,11 @@ export const useGameStore = defineStore('game', {
       }
 
       this.id = gameId;
+      this.player = {
+        id: playerId,
+        name: playerName,
+        score: 0,
+      };
 
       onPlayerJoined(gameId, player => {
         this.players.push(player);

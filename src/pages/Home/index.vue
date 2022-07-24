@@ -50,8 +50,8 @@ export default defineComponent({
   <div v-if="!enterName" class="home">
     <NMain class="main">
       <h1 class="home-title">Memory Game</h1>
-      <NButton :src="startImg" @click="startGame">Start</NButton>
-      <NButton color="white" :src="friendsImg" @click="enterName = true">
+      <NButton svg :src="startImg" @click="startGame">Start</NButton>
+      <NButton svg :src="friendsImg" @click="enterName = true">
         Play with friends
       </NButton>
     </NMain>

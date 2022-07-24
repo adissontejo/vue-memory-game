@@ -6,6 +6,7 @@ export default defineComponent({
 
   props: {
     src: String,
+    svg: Boolean,
     color: {
       type: String as PropType<'primary' | 'white'>,
       default: 'white',
@@ -16,7 +17,8 @@ export default defineComponent({
 
 <template>
   <button class="nbutton" :class="color">
-    <img :src="src" :class="{ hidden: !src }" />
+    <img v-if="!svg" class="icon" :src="src" :class="{ hidden: !src }" />
+    <inline-svg v-else class="icon" :src="src" :class="{ hidden: !src }" />
     <p class="label"><slot></slot></p>
   </button>
 </template>
@@ -40,7 +42,7 @@ export default defineComponent({
   display: flex;
   align-items: center;
 
-  > img {
+  > .icon {
     width: 20px;
     height: 20px;
 
@@ -61,6 +63,10 @@ export default defineComponent({
   &.primary {
     background: $primary-color;
 
+    > .icon {
+      fill: white;
+    }
+
     > p {
       color: white;
     }
@@ -68,6 +74,10 @@ export default defineComponent({
 
   &.white {
     background: white;
+
+    > .icon {
+      fill: $primary-color;
+    }
 
     > p {
       color: $primary-color;

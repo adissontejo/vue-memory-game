@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
+import { defineComponent, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { computed } from '@vue/reactivity';
 
@@ -35,6 +35,7 @@ export default defineComponent({
     );
     const enterName = ref(!store.player.id && route.params.id);
     const selected = ref<number[]>([]);
+    const attempts = ref(0);
 
     const cardShown = computed(() => {
       return cards.value.map((card, index) => {
@@ -60,6 +61,8 @@ export default defineComponent({
       selected.value.push(index);
 
       if (selected.value.length === 2) {
+        attempts.value++;
+
         const cardA = cards.value[selected.value[0]];
         const cardB = cards.value[selected.value[1]];
 
@@ -80,6 +83,7 @@ export default defineComponent({
       cards,
       enterName,
       selected,
+      attempts,
       cardShown,
       online: !!route.params.id,
       joinGame,
@@ -93,6 +97,7 @@ export default defineComponent({
   <EnterName v-if="enterName" @submit="joinGame" />
   <div v-else class="home">
     <h1>Memory Game</h1>
+    <h3>Attempts: {{ attempts }}</h3>
     <main>
       <NCard
         v-for="(card, index) in cards"
@@ -115,7 +120,7 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 40px;
+  gap: 20px;
 
   > h1 {
     text-align: center;

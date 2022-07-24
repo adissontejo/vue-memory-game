@@ -19,6 +19,7 @@ export default defineComponent({
   padding: 50px 10px;
 
   background: $primary-color;
+  border: 1px solid white;
   border-radius: 10px;
   width: calc(100% - 40px);
   max-width: 400px;

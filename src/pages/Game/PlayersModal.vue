@@ -2,17 +2,26 @@
 import { defineComponent } from 'vue';
 import { storeToRefs } from 'pinia';
 
+import startImg from '@/assets/start.svg';
+
+import { NButton } from '@/components';
 import { useGameStore } from '@/store';
 
 export default defineComponent({
   name: 'PlayersModal',
 
+  components: {
+    NButton,
+  },
+
   setup() {
     const store = useGameStore();
 
-    const { players } = storeToRefs(store);
+    const { player, players } = storeToRefs(store);
 
     return {
+      startImg,
+      player,
       players,
     };
   },
@@ -24,10 +33,22 @@ export default defineComponent({
     <div class="wrapper">
       <h2>Players</h2>
       <ul>
-        <li v-for="player in players" :key="player.id">
-          {{ player.name }}
+        <li v-for="item in players" :key="item.id">
+          {{ item.name }}
         </li>
       </ul>
+      <NButton
+        v-if="player.created && players.length > 1"
+        svg
+        class="button"
+        :src="startImg"
+      >
+        Start game
+      </NButton>
+      <p v-else-if="!player.created" class="wait">
+        Wait for the host to start the game
+      </p>
+      <p v-else class="wait">Wait for more players to join</p>
     </div>
   </div>
 </template>
@@ -42,29 +63,40 @@ export default defineComponent({
 
   width: 100vw;
   height: 100vh;
-  background: rgba(1, 1, 1, 0.8);
+  background: rgba(0, 0, 0, 0.4);
 
   > .wrapper {
+    margin: 0 auto;
     padding: 10px;
 
     width: 100%;
+    max-width: 600px;
     height: 100%;
     border: 1px solid white;
     border-radius: 10px;
+    background: $primary-color;
 
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     gap: 15px;
 
-    > h2 {
-      align-self: center;
+    > ul {
+      width: calc(100% - 120px);
+      max-width: 220px;
     }
 
-    > ul {
-      > li {
-        list-style-type: none;
-      }
+    > .button {
+      align-self: center;
+
+      margin: auto 0 20px;
+
+      width: calc(100% - 40px);
+      max-width: 300px;
+    }
+
+    > .wait {
+      margin: auto 0 20px;
     }
   }
 }

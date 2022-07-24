@@ -39,7 +39,7 @@ export default defineComponent({
         required
         v-model.trim="name"
         @blur="input?.focus()"
-        @keydown.enter.once="$emit('submit', name)"
+        @keydown.enter="$emit('submit', name)"
       />
       <NButton @click.once="$emit('submit', name)">Go!</NButton>
     </NMain>
