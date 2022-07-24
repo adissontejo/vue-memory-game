@@ -13,6 +13,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'game',
     component: Game,
   },
+  {
+    path: '/game/:id',
+    name: 'game-with-friends',
+    component: Game,
+  },
 ];
 
 export const router = createRouter({

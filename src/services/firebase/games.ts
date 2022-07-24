@@ -1,4 +1,4 @@
-import { onChildAdded, push, ref, set } from '@firebase/database';
+import { child, get, onChildAdded, push, ref, set } from '@firebase/database';
 
 import { Player } from '@/types';
 
@@ -6,18 +6,40 @@ import { db } from './config';
 
 export const games = ref(db, '/games');
 
-export const createGame = async () => {
+export const createGame = async (creatorName: string) => {
   const game = push(games);
 
-  await set(game, {
-    players: [],
+  const players = child(game, '/players');
+
+  const creator = push(players);
+
+  set(game, {
+    creatorId: creator.key,
+    players: {
+      [creator.key as string]: {
+        name: creatorName,
+        score: 0,
+      },
+    },
+    state: 'waiting',
   });
 
-  return game.key || '';
+  return {
+    gameId: game.key?.substring(1) || null,
+    creatorId: creator.key?.substring(1) || null,
+  };
 };
 
 export const joinGame = async (gameId: string, playerName: string) => {
-  const players = ref(db, `/games/${gameId}/players`);
+  const game = child(games, `/-${gameId}`);
+
+  const gameSnapshot = await get(game);
+
+  if (!gameSnapshot.exists()) {
+    return null;
+  }
+
+  const players = child(game, `/players`);
 
   const player = push(players);
 
@@ -26,25 +48,25 @@ export const joinGame = async (gameId: string, playerName: string) => {
     score: 0,
   });
 
-  return player.key || '';
+  return player.key?.substring(1) || null;
 };
 
 export const onPlayerJoined = (
   gameId: string,
   callback: (player: Player) => void
 ) => {
-  const game = ref(db, `/games/${gameId}`);
+  const game = child(games, `/-${gameId}`);
 
-  onChildAdded(game, snapshot => {
-    const value = snapshot.val() as Record<string, Player>;
+  const players = child(game, '/players');
 
-    const key = Object.keys(value)[0];
+  onChildAdded(players, snapshot => {
+    const value = snapshot.val() as Player;
 
-    const player = value[key];
+    console.log(value);
 
     callback({
-      ...player,
-      id: key,
+      ...value,
+      id: snapshot.key?.substring(1) || '',
     });
   });
 };

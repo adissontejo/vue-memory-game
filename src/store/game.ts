@@ -1,4 +1,4 @@
-import { Module } from 'vuex';
+import { defineStore } from 'pinia';
 
 import { createGame, joinGame, onPlayerJoined } from '@/services/firebase';
 import { Game, Player } from '@/types';
@@ -7,41 +7,52 @@ export type GameState = {
   game?: Game;
 };
 
-export const game: Module<GameState, GameState> = {
-  state: {},
+export const useGameStore = defineStore('game', {
+  state: () => ({
+    id: '',
+    players: [] as Player[],
+    player: {} as Player,
+  }),
 
   getters: {},
 
-  mutations: {
-    setGame: (state, game: Game) => {
-      state.game = game;
-    },
-
-    addPlayer: (state, player: Player) => {
-      state.game?.players.push(player);
-    },
-  },
-
   actions: {
-    createGame: async ({ commit, dispatch }, playerName: string) => {
-      const gameId = await createGame();
+    async createGame(creatorName: string) {
+      const { gameId, creatorId } = await createGame(creatorName);
 
-      commit('setGame', {
-        id: gameId,
-        players: [],
-      } as Game);
+      if (!gameId || !creatorId) {
+        return null;
+      }
+
+      this.id = gameId;
+      this.player = {
+        id: creatorId,
+        name: creatorName,
+        score: 0,
+      };
+      this.players = [this.player];
 
       onPlayerJoined(gameId, player => {
-        commit('addPlayer', player);
+        this.players.push(player);
       });
 
-      dispatch('joinGame', playerName);
+      return gameId;
     },
 
-    joinGame: async ({ state, commit }, playerName: string) => {
-      if (state.game) {
-        await joinGame(state.game.id, playerName);
+    async joinGame(gameId: string, playerName: string) {
+      const playerId = await joinGame(gameId, playerName);
+
+      if (!playerId) {
+        return null;
       }
+
+      this.id = gameId;
+
+      onPlayerJoined(gameId, player => {
+        this.players.push(player);
+      });
+
+      return playerId;
     },
   },
-};
+});

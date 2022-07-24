@@ -1,69 +1,87 @@
 <script lang="ts">
-import { defineComponent, reactive } from 'vue';
-import { computed, toRefs } from '@vue/reactivity';
+import { defineComponent, onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { computed } from '@vue/reactivity';
 
 import { NCard } from '@/components';
+import { useGameStore } from '@/store';
 import { getMemoryCardsList } from '@/utils';
-import { useRouter } from 'vue-router';
 
-const cards = getMemoryCardsList();
+import EnterName from '@/pages/EnterName/index.vue';
+
+import PlayersModal from './PlayersModal.vue';
+
+const memoryCards = getMemoryCardsList();
 
 export default defineComponent({
-  name: 'Home',
+  name: 'Game',
 
   components: {
     NCard,
+    EnterName,
+    PlayersModal,
   },
 
   setup() {
     const router = useRouter();
+    const route = useRoute();
+    const store = useGameStore();
 
-    const state = reactive({
-      cards: cards.map(item => ({
+    const cards = ref(
+      memoryCards.map(item => ({
         color: item,
         found: false,
-      })),
-      selected: [] as number[],
-    });
+      }))
+    );
+    const enterName = ref(!store.player.id);
+    const selected = ref<number[]>([]);
 
     const cardShown = computed(() => {
-      return state.cards.map((card, index) => {
-        return state.selected.some(item => item === index) || card.found;
+      return cards.value.map((card, index) => {
+        return selected.value.some(item => item === index) || card.found;
       });
     });
 
-    const goHome = () => {
-      router.push('/');
+    const joinGame = async (name: string) => {
+      const playerId = await store.joinGame(route.params.id as string, name);
+
+      if (!playerId) {
+        alert('Game not found.');
+      }
+
+      enterName.value = false;
     };
 
     const selectCard = (index: number) => {
-      if (cardShown.value[index] || state.selected.length === 2) {
+      if (cardShown.value[index] || selected.value.length === 2) {
         return;
       }
 
-      state.selected.push(index);
+      selected.value.push(index);
 
-      if (state.selected.length === 2) {
-        const cardA = state.cards[state.selected[0]];
-        const cardB = state.cards[state.selected[1]];
+      if (selected.value.length === 2) {
+        const cardA = cards.value[selected.value[0]];
+        const cardB = cards.value[selected.value[1]];
 
         if (cardA.color !== cardB.color) {
           setTimeout(() => {
-            state.selected = [];
+            selected.value = [];
           }, 1000);
         } else {
           cardA.found = true;
           cardB.found = true;
 
-          state.selected = [];
+          selected.value = [];
         }
       }
     };
 
     return {
-      ...state,
+      cards,
+      enterName,
+      selected,
       cardShown,
-      goHome,
+      joinGame,
       selectCard,
     };
   },
@@ -71,8 +89,9 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="home">
-    <h1 @click="goHome">Memory Game</h1>
+  <EnterName v-if="enterName" @submit="joinGame" />
+  <div v-else class="home">
+    <h1>Memory Game</h1>
     <main>
       <NCard
         v-for="(card, index) in cards"
@@ -82,7 +101,39 @@ export default defineComponent({
         @click="selectCard(index)"
       />
     </main>
+    <PlayersModal />
   </div>
 </template>
 
-<style lang="scss" scoped src="./styles.scss" />
+<style lang="scss" scoped>
+.home {
+  padding: 30px 0 15px;
+
+  width: 100vw;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+
+  > h1 {
+    text-align: center;
+  }
+
+  > main {
+    padding: 0 10px;
+
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 150px);
+    justify-content: space-evenly;
+    grid-gap: 20px;
+
+    &::after {
+      content: '';
+      flex: 1;
+    }
+  }
+}
+</style>
