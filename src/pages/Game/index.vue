@@ -33,7 +33,7 @@ export default defineComponent({
         found: false,
       }))
     );
-    const enterName = ref(!store.player.id);
+    const enterName = ref(!store.player.id && route.params.id);
     const selected = ref<number[]>([]);
 
     const cardShown = computed(() => {
@@ -81,6 +81,7 @@ export default defineComponent({
       enterName,
       selected,
       cardShown,
+      online: !!route.params.id,
       joinGame,
       selectCard,
     };
@@ -101,7 +102,7 @@ export default defineComponent({
         @click="selectCard(index)"
       />
     </main>
-    <PlayersModal />
+    <PlayersModal v-if="online" />
   </div>
 </template>
 
