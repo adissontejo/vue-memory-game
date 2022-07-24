@@ -30,7 +30,6 @@ export const useGameStore = defineStore('game', {
         name: creatorName,
         score: 0,
       };
-      this.players = [this.player];
 
       onPlayerJoined(gameId, player => {
         this.players.push(player);
