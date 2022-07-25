@@ -34,12 +34,6 @@ export default defineComponent({
 
     const data = online ? useOnline() : useLocal();
 
-    const test = ref(false);
-
-    onMounted(() => {
-      test.value = true;
-    });
-
     const cardShown = computed(() => {
       return data.cards?.value.map((item, index) => {
         return data.selectedCards.value.includes(index) || item.found;
@@ -48,7 +42,7 @@ export default defineComponent({
 
     const beforeEnter = (el: Element) => {
       gsap.set(el, {
-        position: 'fixed',
+        position: 'absolute',
         x: 0,
         y: 0,
       });
@@ -62,7 +56,7 @@ export default defineComponent({
       });
 
       Flip.from(state, {
-        delay: el.dataset.index * 0.05,
+        delay: el.dataset.index * 0.1,
         duration: 0.3,
         onComplete: () => done(),
       });
@@ -71,7 +65,6 @@ export default defineComponent({
     return {
       playingNow: {} as Player,
       online,
-      test,
       cardShown,
       beforeEnter,
       enter,
@@ -82,14 +75,19 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="home">
+  <div class="game">
     <h1>Memory Game</h1>
     <h3 v-if="!online">Attempts: {{ attempts }}</h3>
     <h3 v-else-if="playingNow">
       Playing now: {{ playingNow.name }}<br />Score: {{ playingNow.score }}
     </h3>
     <main>
-      <TransitionGroup name="card" @before-enter="beforeEnter" @enter="enter">
+      <TransitionGroup
+        name="card"
+        :appear="true"
+        @before-enter="beforeEnter"
+        @enter="enter"
+      >
         <div
           v-for="(card, index) in cards"
           class="card"
@@ -109,8 +107,8 @@ export default defineComponent({
 </template>
 
 <style lang="scss" scoped>
-.home {
-  padding: 30px 0 15px;
+.game {
+  padding: 30px;
 
   width: 100vw;
 
@@ -125,13 +123,13 @@ export default defineComponent({
   }
 
   > main {
-    padding: 0 30px;
+    position: relative;
 
     width: 100%;
 
     display: grid;
     grid-template-columns: repeat(auto-fill, 130px);
-    justify-content: space-evenly;
+    justify-content: space-between;
     grid-gap: 10px;
   }
 }
