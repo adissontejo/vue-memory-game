@@ -70,13 +70,15 @@ export default defineComponent({
   height: 100vh;
   background: rgba(0, 0, 0, 0.4);
 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   > .wrapper {
-    margin: 0 auto;
     padding: 10px;
 
     width: 100%;
     max-width: 600px;
-    height: 100%;
     border: 1px solid white;
     border-radius: 10px;
     background: $primary-color;
@@ -87,21 +89,31 @@ export default defineComponent({
     gap: 15px;
 
     > ul {
-      width: calc(100% - 120px);
-      max-width: 220px;
+      padding: 0 20px;
+
+      width: calc(100% - 80px);
+      height: 250px;
+
+      display: flex;
+      flex-direction: column;
+      flex-wrap: wrap;
+
+      > li {
+        text-overflow: ellipsis;
+      }
     }
 
     > .button {
       align-self: center;
 
-      margin: auto 0 20px;
+      margin: 10px 0 20px;
 
       width: calc(100% - 40px);
       max-width: 300px;
     }
 
     > .wait {
-      margin: auto 0 20px;
+      margin: 10px 0 20px;
     }
   }
 }
