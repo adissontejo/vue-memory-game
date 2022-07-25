@@ -7,14 +7,8 @@ export const useLocal = () => {
   const selected = ref<number[]>([]);
   const attempts = ref(0);
 
-  const cardShown = computed(() => {
-    return cards.value.map((card, index) => {
-      return selected.value.some(item => item === index) || card.found;
-    });
-  });
-
   const selectCard = (index: number) => {
-    if (cardShown.value[index] || selected.value.length === 2) {
+    if (selected.value.includes(index) || selected.value.length === 2) {
       return;
     }
 
@@ -43,7 +37,6 @@ export const useLocal = () => {
     cards,
     selected,
     attempts,
-    cardShown,
     selectCard,
   };
 };

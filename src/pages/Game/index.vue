@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { computed, defineComponent } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { NCard } from '@/components';
@@ -23,8 +23,15 @@ export default defineComponent({
 
     const data = online ? useOnline() : useLocal();
 
+    const cardShown = computed(() => {
+      return data.cards.value.map((item, index) => {
+        return data.selected.value.includes(index) || item.found;
+      });
+    });
+
     return {
       online,
+      cardShown,
       ...data,
     };
   },

@@ -1,4 +1,4 @@
-import { child, onValue } from '@firebase/database';
+import { child, onChildAdded, onValue, set } from '@firebase/database';
 
 import { Card } from '@/types';
 
@@ -27,4 +27,33 @@ export const onCardsAdded = (
     },
     { onlyOnce: true }
   );
+};
+
+export const selectCard = async (gameId: string, cardIndex: number) => {
+  const game = child(games, `/-${gameId}`);
+
+  const selected = child(game, '/selected');
+
+  const card = child(selected, `/${cardIndex}`);
+
+  await set(card, true);
+};
+
+export const onCardSelected = (
+  gameId: string,
+  callback: (cardIndex: number) => void
+) => {
+  const game = child(games, `/-${gameId}`);
+
+  const selected = child(game, '/selected');
+
+  onChildAdded(selected, snapshot => {
+    if (!snapshot.key) {
+      return;
+    }
+
+    const cardIndex = parseInt(snapshot.key);
+
+    callback(cardIndex);
+  });
 };

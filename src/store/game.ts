@@ -5,10 +5,14 @@ import {
   joinGame,
   leaveGame,
   onCardsAdded,
+  onCardSelected,
+  onGameStateChanged,
   onPlayerJoined,
   onPlayerLeft,
+  selectCard,
+  setGameState,
 } from '@/services/games';
-import { Card, Player } from '@/types';
+import { Card, GameState, Player } from '@/types';
 
 export const useGameStore = defineStore('game', {
   state: () => ({
@@ -18,9 +22,10 @@ export const useGameStore = defineStore('game', {
       created?: boolean;
     },
     cards: [] as Card[],
+    state: '' as GameState,
+    turn: '',
+    selected: [] as number[],
   }),
-
-  getters: {},
 
   actions: {
     async createGame(creatorName: string) {
@@ -40,6 +45,7 @@ export const useGameStore = defineStore('game', {
 
       this.watchPlayers(gameId);
       this.watchCards(gameId);
+      this.watchGame(gameId);
 
       return gameId;
     },
@@ -60,6 +66,7 @@ export const useGameStore = defineStore('game', {
 
       this.watchPlayers(gameId);
       this.watchCards(gameId);
+      this.watchGame(gameId);
 
       return playerId;
     },
@@ -71,10 +78,15 @@ export const useGameStore = defineStore('game', {
 
       await leaveGame(this.id, this.player.id);
 
-      this.id = '';
-      this.players = [];
-      this.player = {} as Player;
-      this.cards = [];
+      this.$reset();
+    },
+
+    async startGame() {
+      await setGameState(this.id, 'in-progress');
+    },
+
+    async selectCard(cardIndex: number) {
+      await selectCard(this.id, cardIndex);
     },
 
     watchPlayers(gameId: string) {
@@ -98,6 +110,20 @@ export const useGameStore = defineStore('game', {
 
       onCardsAdded(gameId, cards => {
         this.cards = cards;
+      });
+    },
+
+    watchGame(gameId: string) {
+      this.state = 'waiting';
+      this.turn = '';
+      this.selected = [];
+
+      onGameStateChanged(gameId, state => {
+        this.state = state;
+      });
+
+      onCardSelected(gameId, cardIndex => {
+        this.selected.push(cardIndex);
       });
     },
   },

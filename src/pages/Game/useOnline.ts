@@ -13,7 +13,9 @@ export const useOnline = () => {
 
   const local = useLocal();
 
-  const { cards } = storeToRefs(store);
+  const { cards, selected } = storeToRefs(store);
+
+  const { selectCard } = store;
 
   onBeforeMount(() => {
     if (!store.player.id) {
@@ -36,5 +38,7 @@ export const useOnline = () => {
   return {
     ...local,
     cards,
+    selected,
+    selectCard,
   };
 };

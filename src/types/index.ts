@@ -1,3 +1,5 @@
+export type GameState = 'waiting' | 'in-progress' | 'finished';
+
 export type Player = {
   id: string;
   name: string;

@@ -1,6 +1,6 @@
-import { child, get, push, remove, set } from '@firebase/database';
+import { child, get, onValue, push, remove, set } from '@firebase/database';
 
-import { Player } from '@/types';
+import { GameState, Player } from '@/types';
 import { getMemoryCardsList } from '@/utils';
 
 import { games } from './base';
@@ -25,6 +25,7 @@ export const createGame = async (creatorName: string) => {
     cards,
     state: 'waiting',
     turn: '',
+    selected: {},
   });
 
   window.addEventListener('beforeunload', () => remove(game));
@@ -38,9 +39,9 @@ export const createGame = async (creatorName: string) => {
 export const joinGame = async (gameId: string, playerName: string) => {
   const game = child(games, `/-${gameId}`);
 
-  const gameState = await get(child(game, '/state'));
+  const state = await get(child(game, '/state'));
 
-  if (!gameState.exists()) {
+  if (!state.exists()) {
     return null;
   }
 
@@ -72,6 +73,27 @@ export const leaveGame = async (gameId: string, playerId: string) => {
   } else {
     await remove(player);
   }
+};
+
+export const setGameState = async (gameId: string, newState: GameState) => {
+  const game = child(games, `/-${gameId}`);
+
+  const state = child(game, '/state');
+
+  await set(state, newState);
+};
+
+export const onGameStateChanged = (
+  gameId: string,
+  callback: (state: GameState) => void
+) => {
+  const game = child(games, `/-${gameId}`);
+
+  const state = child(game, '/state');
+
+  onValue(state, snapshot => {
+    callback(snapshot.val());
+  });
 };
 
 export * from './players';

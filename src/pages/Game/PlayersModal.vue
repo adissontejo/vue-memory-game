@@ -17,19 +17,23 @@ export default defineComponent({
   setup() {
     const store = useGameStore();
 
-    const { player, players } = storeToRefs(store);
+    const { player, players, state } = storeToRefs(store);
+
+    const { startGame } = store;
 
     return {
       startImg,
       player,
       players,
+      state,
+      startGame,
     };
   },
 });
 </script>
 
 <template>
-  <div class="players-modal">
+  <div v-if="state === 'waiting'" class="players-modal">
     <div class="wrapper">
       <h2>Players</h2>
       <ul>
@@ -42,6 +46,7 @@ export default defineComponent({
         svg
         class="button"
         :src="startImg"
+        @click="startGame"
       >
         Start game
       </NButton>
