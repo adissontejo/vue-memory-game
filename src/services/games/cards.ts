@@ -1,4 +1,10 @@
-import { child, onChildAdded, onValue, set } from '@firebase/database';
+import {
+  child,
+  onChildAdded,
+  onChildChanged,
+  onValue,
+  set,
+} from '@firebase/database';
 
 import { Card } from '@/types';
 
@@ -26,31 +32,62 @@ export const onCards = (gameId: string, callback: (cards: Card[]) => void) => {
   );
 };
 
-export const pushSelectedCard = async (gameId: string, cardIndex: number) => {
+export const setSelectedCards = async (gameId: string, value: number[]) => {
   const game = child(games, `/-${gameId}`);
 
   const selected = child(game, '/selected');
 
-  const card = child(selected, `/${cardIndex}`);
-
-  await set(card, true);
+  await set(
+    selected,
+    value.reduce((acc, curr) => {
+      return {
+        ...acc,
+        [curr.toString()]: true,
+      };
+    }, {})
+  );
 };
 
-export const onSelectedCardAdded = (
+export const onSelectedCards = (
   gameId: string,
-  callback: (cardIndex: number) => void
+  callback: (selectedCards: number[]) => void
 ) => {
   const game = child(games, `/-${gameId}`);
 
   const selected = child(game, '/selected');
 
-  onChildAdded(selected, snapshot => {
-    if (!snapshot.key) {
-      return;
+  onValue(selected, snapshot => {
+    const value = snapshot.val() || ({} as Record<string, boolean>);
+
+    callback(Object.keys(value).map(item => parseInt(item)));
+  });
+};
+
+export const setCardFound = async (gameId: string, cardIndex: number) => {
+  const game = child(games, `/-${gameId}`);
+
+  const cards = child(game, '/cards');
+
+  const card = child(cards, `/${cardIndex}`);
+
+  const found = child(card, '/found');
+
+  await set(found, true);
+};
+
+export const onCardFound = async (
+  gameId: string,
+  callback: (cardIndex: number) => void
+) => {
+  const game = child(games, `/-${gameId}`);
+
+  const cards = child(game, '/cards');
+
+  onChildChanged(cards, snapshot => {
+    const card = snapshot.val() as Card;
+
+    if (snapshot.key && card.found) {
+      callback(parseInt(snapshot.key));
     }
-
-    const cardIndex = parseInt(snapshot.key);
-
-    callback(cardIndex);
   });
 };

@@ -7,6 +7,7 @@ import { NCard } from '@/components';
 import PlayersModal from './PlayersModal.vue';
 import { useLocal } from './useLocal';
 import { useOnline } from './useOnline';
+import { Player } from '@/types';
 
 export default defineComponent({
   name: 'Game',
@@ -30,6 +31,7 @@ export default defineComponent({
     });
 
     return {
+      playingNow: {} as Player,
       online,
       cardShown,
       ...data,
@@ -41,7 +43,10 @@ export default defineComponent({
 <template>
   <div class="home">
     <h1>Memory Game</h1>
-    <h3>Attempts: {{ attempts }}</h3>
+    <h3 v-if="!online">Attempts: {{ attempts }}</h3>
+    <h3 v-else-if="playingNow">
+      Playing now: {{ playingNow.name }}<br />Score: {{ playingNow.score }}
+    </h3>
     <main>
       <NCard
         v-for="(card, index) in cards"
@@ -66,7 +71,8 @@ export default defineComponent({
   align-items: center;
   gap: 20px;
 
-  > h1 {
+  > h1,
+  > h3 {
     text-align: center;
   }
 

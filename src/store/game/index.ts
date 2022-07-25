@@ -7,6 +7,7 @@ import {
   pushPlayer,
   removePlayer,
   setGameState,
+  setTurn,
 } from '@/services/games';
 import { GameState, Player } from '@/types';
 
@@ -17,9 +18,8 @@ export const useGameStore = defineStore('game', () => {
   const gameId = ref<string | null>(null);
   const gameState = ref<GameState>('waiting');
   const player = ref<Partial<Player & { creator: boolean }>>({});
-  const turn = ref<string>('');
 
-  const playersStore = usePlayers(gameId);
+  const playersStore = usePlayers(gameId, gameState);
   const cardStore = useCards(gameId, gameState);
 
   watch(gameId, () => {
@@ -39,7 +39,6 @@ export const useGameStore = defineStore('game', () => {
     gameId.value = null;
     gameState.value = 'waiting';
     player.value = {};
-    turn.value = '';
   };
 
   const createGame = async (creatorName: string) => {
@@ -88,18 +87,29 @@ export const useGameStore = defineStore('game', () => {
   };
 
   const startGame = async () => {
-    if (!gameId.value) {
+    if (!gameId.value || !player.value.id) {
       return;
     }
 
     await setGameState(gameId.value, 'in-progress');
+
+    await setTurn(gameId.value, player.value.id);
+  };
+
+  const nextRound = async () => {
+    const point = await cardStore.checkPair();
+
+    if (point) {
+      await playersStore.incrementScore();
+    } else {
+      await playersStore.nextPlayer();
+    }
   };
 
   return {
     gameId,
     gameState,
     player,
-    turn,
     ...playersStore,
     ...cardStore,
     reset,
@@ -107,5 +117,6 @@ export const useGameStore = defineStore('game', () => {
     joinGame,
     leaveGame,
     startGame,
+    nextRound,
   };
 });

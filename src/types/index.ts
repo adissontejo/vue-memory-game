@@ -3,7 +3,7 @@ export type GameState = 'waiting' | 'in-progress' | 'finished';
 export type Player = {
   id: string;
   name: string;
-  score: 0;
+  score: number;
 };
 
 export type Card = {

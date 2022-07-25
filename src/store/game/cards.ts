@@ -1,9 +1,11 @@
 import { Ref, ref, watch } from 'vue';
 
 import {
-  pushSelectedCard,
+  onCardFound,
   onCards,
-  onSelectedCardAdded,
+  onSelectedCards,
+  setCardFound,
+  setSelectedCards,
 } from '@/services/games';
 import { Card, GameState } from '@/types';
 
@@ -20,11 +22,47 @@ export const useCards = (
   };
 
   const selectCard = async (cardIndex: number) => {
+    if (!gameId.value || selectedCards.value.length >= 2) {
+      return;
+    }
+
+    if (selectedCards.value.includes(cardIndex)) {
+      return;
+    }
+
+    await setSelectedCards(gameId.value, [...selectedCards.value, cardIndex]);
+  };
+
+  const checkPair = async () => {
     if (!gameId.value) {
       return;
     }
 
-    await pushSelectedCard(gameId.value, cardIndex);
+    const cardA = selectedCards.value[0];
+    const cardB = selectedCards.value[1];
+
+    if (cards.value[cardA].color === cards.value[cardB].color) {
+      await setCardFound(gameId.value, cardA);
+      await setCardFound(gameId.value, cardB);
+
+      await setSelectedCards(gameId.value, []);
+
+      return true;
+    }
+
+    await new Promise<void>(resolve => {
+      setTimeout(async () => {
+        if (!gameId.value) {
+          return;
+        }
+
+        await setSelectedCards(gameId.value, []);
+
+        resolve();
+      }, 500);
+    });
+
+    return false;
   };
 
   watch(gameId, () => {
@@ -38,14 +76,16 @@ export const useCards = (
   });
 
   watch(gameState, () => {
-    console.log('in');
-
     if (!gameId.value || gameState.value !== 'in-progress') {
       return;
     }
 
-    onSelectedCardAdded(gameId.value, index => {
-      selectedCards.value.push(index);
+    onSelectedCards(gameId.value, data => {
+      selectedCards.value = data;
+    });
+
+    onCardFound(gameId.value, cardIndex => {
+      cards.value[cardIndex].found = true;
     });
   });
 
@@ -54,5 +94,6 @@ export const useCards = (
     selectedCards,
     reset,
     selectCard,
+    checkPair,
   };
 };

@@ -1,13 +1,52 @@
-import { Ref, ref, watch } from 'vue';
+import { computed, Ref, ref, watch } from 'vue';
 
-import { onPlayerAdded, onPlayerRemoved } from '@/services/games';
+import {
+  onPlayerAdded,
+  onPlayerRemoved,
+  onPlayerScoreChanged,
+  onTurn,
+  setPlayerScore,
+  setTurn,
+} from '@/services/games';
 import { Player } from '@/types';
 
-export const usePlayers = (gameId: Ref<string | null>) => {
+export const usePlayers = (
+  gameId: Ref<string | null>,
+  gameState: Ref<string>
+) => {
   const players = ref<Player[]>([]);
+  const turn = ref<string>('');
+
+  const playingNow = computed(() => {
+    return players.value.find(item => item.id === turn.value);
+  });
 
   const reset = () => {
     players.value = [];
+  };
+
+  const nextPlayer = async () => {
+    if (!gameId.value) {
+      return;
+    }
+
+    const current = players.value.findIndex(item => turn.value === item.id);
+
+    const next = (current + 1) % players.value.length;
+
+    await setTurn(gameId.value, players.value[next].id);
+  };
+
+  const incrementScore = async () => {
+    if (!gameId.value || !playingNow.value) {
+      return;
+    }
+
+    await setPlayerScore(
+      gameId.value,
+      playingNow.value.id,
+      playingNow.value.score + 1
+    );
   };
 
   watch(gameId, () => {
@@ -26,8 +65,28 @@ export const usePlayers = (gameId: Ref<string | null>) => {
     });
   });
 
+  watch(gameState, () => {
+    if (!gameId.value || gameState.value !== 'in-progress') {
+      return;
+    }
+
+    onTurn(gameId.value, playerId => {
+      turn.value = playerId;
+    });
+
+    onPlayerScoreChanged(gameId.value, (playerId, score) => {
+      const playerIndex = players.value.findIndex(item => item.id === playerId);
+
+      players.value[playerIndex].score = score;
+    });
+  });
+
   return {
     players,
+    playingNow,
+    turn,
     reset,
+    nextPlayer,
+    incrementScore,
   };
 };

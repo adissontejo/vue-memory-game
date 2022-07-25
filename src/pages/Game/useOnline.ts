@@ -1,4 +1,4 @@
-import { onBeforeMount, onMounted } from 'vue';
+import { onBeforeMount, onMounted, watch } from 'vue';
 import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 
@@ -13,9 +13,21 @@ export const useOnline = () => {
 
   const local = useLocal();
 
-  const { cards, selectedCards } = storeToRefs(store);
+  const { player, playingNow, cards, selectedCards } = storeToRefs(store);
 
-  const { selectCard } = store;
+  const { nextRound } = store;
+
+  watch(selectedCards, () => {
+    if (selectedCards.value.length !== 2) {
+      return;
+    }
+
+    if (player.value.id !== playingNow.value?.id) {
+      return;
+    }
+
+    nextRound();
+  });
 
   onBeforeMount(() => {
     if (!store.player.id) {
@@ -25,20 +37,21 @@ export const useOnline = () => {
     }
   });
 
-  onMounted(() => {
-    window.addEventListener('beforeunload', () => {
-      store.leaveGame();
-    });
-  });
-
   onBeforeRouteLeave(async () => {
     await store.leaveGame();
   });
+
+  const selectCard = (cardIndex: number) => {
+    if (player.value.id === playingNow.value?.id) {
+      store.selectCard(cardIndex);
+    }
+  };
 
   return {
     ...local,
     cards,
     selectedCards,
+    playingNow,
     selectCard,
   };
 };
