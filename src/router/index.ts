@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 
-import { Game, Home } from '@/pages';
+import { EnterGame, Game, Home } from '@/pages';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -14,9 +14,20 @@ const routes: Array<RouteRecordRaw> = [
     component: Game,
   },
   {
+    path: '/game/new',
+    name: 'create-game',
+    component: EnterGame,
+    props: { action: 'create' },
+  },
+  {
     path: '/game/:id',
-    name: 'game-with-friends',
+    name: 'online-game',
     component: Game,
+  },
+  {
+    path: '/game/:id/join',
+    name: 'join-game',
+    component: EnterGame,
   },
 ];
 

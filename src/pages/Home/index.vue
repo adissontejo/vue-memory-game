@@ -6,9 +6,6 @@ import startImg from '@/assets/start.svg';
 import friendsImg from '@/assets/friends.svg';
 
 import { NButton, NMain } from '@/components';
-import { useGameStore } from '@/store';
-
-import EnterName from '@/pages/EnterName/index.vue';
 
 export default defineComponent({
   name: 'Home',
@@ -16,47 +13,39 @@ export default defineComponent({
   components: {
     NButton,
     NMain,
-    EnterName,
   },
 
   setup() {
     const router = useRouter();
-    const store = useGameStore();
-
-    const enterName = ref(false);
 
     const startGame = () => {
       router.push('/game');
     };
 
-    const createGame = async (creatorName: string) => {
-      const gameId = await store.createGame(creatorName);
-
-      router.push(`/game/${gameId}`);
+    const playOnline = () => {
+      router.push('/game/new');
     };
 
     return {
-      enterName,
       startImg,
       friendsImg,
       startGame,
-      createGame,
+      playOnline,
     };
   },
 });
 </script>
 
 <template>
-  <div v-if="!enterName" class="home">
+  <div class="home">
     <NMain class="main">
       <h1 class="home-title">Memory Game</h1>
       <NButton svg :src="startImg" @click="startGame">Start</NButton>
-      <NButton svg :src="friendsImg" @click="enterName = true">
+      <NButton svg :src="friendsImg" @click="playOnline">
         Play with friends
       </NButton>
     </NMain>
   </div>
-  <EnterName v-else @submit="createGame" />
 </template>
 
 <style lang="scss" scoped>

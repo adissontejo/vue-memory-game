@@ -1,11 +1,14 @@
 import { defineStore } from 'pinia';
 
-import { createGame, joinGame, onPlayerJoined } from '@/services/firebase';
-import { Game, Player } from '@/types';
-
-export type GameState = {
-  game?: Game;
-};
+import {
+  createGame,
+  joinGame,
+  leaveGame,
+  onCardsAdded,
+  onPlayerJoined,
+  onPlayerLeft,
+} from '@/services/games';
+import { Card, Player } from '@/types';
 
 export const useGameStore = defineStore('game', {
   state: () => ({
@@ -14,6 +17,7 @@ export const useGameStore = defineStore('game', {
     player: {} as Player & {
       created?: boolean;
     },
+    cards: [] as Card[],
   }),
 
   getters: {},
@@ -34,9 +38,8 @@ export const useGameStore = defineStore('game', {
         created: true,
       };
 
-      onPlayerJoined(gameId, player => {
-        this.players.push(player);
-      });
+      this.watchPlayers(gameId);
+      this.watchCards(gameId);
 
       return gameId;
     },
@@ -55,11 +58,47 @@ export const useGameStore = defineStore('game', {
         score: 0,
       };
 
+      this.watchPlayers(gameId);
+      this.watchCards(gameId);
+
+      return playerId;
+    },
+
+    async leaveGame() {
+      if (!this.player.id) {
+        return;
+      }
+
+      await leaveGame(this.id, this.player.id);
+
+      this.id = '';
+      this.players = [];
+      this.player = {} as Player;
+      this.cards = [];
+    },
+
+    watchPlayers(gameId: string) {
+      this.players = [];
+
       onPlayerJoined(gameId, player => {
         this.players.push(player);
       });
 
-      return playerId;
+      onPlayerLeft(gameId, playerId => {
+        const playerIndex = this.players.findIndex(
+          item => item.id === playerId
+        );
+
+        this.players.splice(playerIndex, 1);
+      });
+    },
+
+    watchCards(gameId: string) {
+      this.cards = [];
+
+      onCardsAdded(gameId, cards => {
+        this.cards = cards;
+      });
     },
   },
 });

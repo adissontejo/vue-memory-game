@@ -1,101 +1,38 @@
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { computed } from '@vue/reactivity';
+import { defineComponent } from 'vue';
+import { useRoute } from 'vue-router';
 
 import { NCard } from '@/components';
-import { useGameStore } from '@/store';
-import { getMemoryCardsList } from '@/utils';
-
-import EnterName from '@/pages/EnterName/index.vue';
 
 import PlayersModal from './PlayersModal.vue';
-
-const memoryCards = getMemoryCardsList();
+import { useLocal } from './useLocal';
+import { useOnline } from './useOnline';
 
 export default defineComponent({
   name: 'Game',
 
   components: {
     NCard,
-    EnterName,
     PlayersModal,
   },
 
   setup() {
-    const router = useRouter();
     const route = useRoute();
-    const store = useGameStore();
 
-    const cards = ref(
-      memoryCards.map(item => ({
-        color: item,
-        found: false,
-      }))
-    );
-    const enterName = ref(!store.player.id && route.params.id);
-    const selected = ref<number[]>([]);
-    const attempts = ref(0);
+    const online = !!route.params.id;
 
-    const cardShown = computed(() => {
-      return cards.value.map((card, index) => {
-        return selected.value.some(item => item === index) || card.found;
-      });
-    });
-
-    const joinGame = async (name: string) => {
-      const playerId = await store.joinGame(route.params.id as string, name);
-
-      if (!playerId) {
-        alert('Game not found.');
-      }
-
-      enterName.value = false;
-    };
-
-    const selectCard = (index: number) => {
-      if (cardShown.value[index] || selected.value.length === 2) {
-        return;
-      }
-
-      selected.value.push(index);
-
-      if (selected.value.length === 2) {
-        attempts.value++;
-
-        const cardA = cards.value[selected.value[0]];
-        const cardB = cards.value[selected.value[1]];
-
-        if (cardA.color !== cardB.color) {
-          setTimeout(() => {
-            selected.value = [];
-          }, 1000);
-        } else {
-          cardA.found = true;
-          cardB.found = true;
-
-          selected.value = [];
-        }
-      }
-    };
+    const data = online ? useOnline() : useLocal();
 
     return {
-      cards,
-      enterName,
-      selected,
-      attempts,
-      cardShown,
-      online: !!route.params.id,
-      joinGame,
-      selectCard,
+      online,
+      ...data,
     };
   },
 });
 </script>
 
 <template>
-  <EnterName v-if="enterName" @submit="joinGame" />
-  <div v-else class="home">
+  <div class="home">
     <h1>Memory Game</h1>
     <h3>Attempts: {{ attempts }}</h3>
     <main>

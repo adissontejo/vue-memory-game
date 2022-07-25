@@ -1,10 +1,9 @@
-import { child, get, onChildAdded, push, ref, set } from '@firebase/database';
+import { child, get, push, remove, set } from '@firebase/database';
 
 import { Player } from '@/types';
+import { getMemoryCardsList } from '@/utils';
 
-import { db } from './config';
-
-export const games = ref(db, '/games');
+import { games } from './base';
 
 export const createGame = async (creatorName: string) => {
   const game = push(games);
@@ -13,7 +12,9 @@ export const createGame = async (creatorName: string) => {
 
   const creator = push(players);
 
-  set(game, {
+  const cards = getMemoryCardsList();
+
+  await set(game, {
     creatorId: creator.key,
     players: {
       [creator.key as string]: {
@@ -21,8 +22,12 @@ export const createGame = async (creatorName: string) => {
         score: 0,
       },
     },
+    cards,
     state: 'waiting',
+    turn: '',
   });
+
+  window.addEventListener('beforeunload', () => remove(game));
 
   return {
     gameId: game.key?.substring(1) || null,
@@ -33,9 +38,9 @@ export const createGame = async (creatorName: string) => {
 export const joinGame = async (gameId: string, playerName: string) => {
   const game = child(games, `/-${gameId}`);
 
-  const gameSnapshot = await get(game);
+  const gameState = await get(child(game, '/state'));
 
-  if (!gameSnapshot.exists()) {
+  if (!gameState.exists()) {
     return null;
   }
 
@@ -48,25 +53,26 @@ export const joinGame = async (gameId: string, playerName: string) => {
     score: 0,
   });
 
+  window.addEventListener('beforeunload', () => remove(player));
+
   return player.key?.substring(1) || null;
 };
 
-export const onPlayerJoined = (
-  gameId: string,
-  callback: (player: Player) => void
-) => {
+export const leaveGame = async (gameId: string, playerId: string) => {
   const game = child(games, `/-${gameId}`);
+
+  const creatorId = await get(child(game, '/creatorId'));
 
   const players = child(game, '/players');
 
-  onChildAdded(players, snapshot => {
-    const value = snapshot.val() as Player;
+  const player = child(players, `/-${playerId}`);
 
-    console.log(value);
-
-    callback({
-      ...value,
-      id: snapshot.key?.substring(1) || '',
-    });
-  });
+  if (creatorId.val() === `-${playerId}`) {
+    await remove(game);
+  } else {
+    await remove(player);
+  }
 };
+
+export * from './players';
+export * from './cards';

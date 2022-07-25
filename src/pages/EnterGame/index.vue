@@ -1,21 +1,30 @@
 <script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
+import { defineComponent, onMounted, PropType, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 import { NButton, NMain } from '@/components';
+import { useGameStore } from '@/store';
 
 export default defineComponent({
-  name: 'EnterName',
+  name: 'EnterGame',
 
   components: {
     NButton,
     NMain,
   },
 
-  emits: {
-    submit: (name: string) => {},
+  props: {
+    action: {
+      type: String as PropType<'create' | 'join'>,
+      default: 'join',
+    },
   },
 
-  setup() {
+  setup(props) {
+    const store = useGameStore();
+    const router = useRouter();
+    const route = useRoute();
+
     const name = ref('');
     const input = ref<HTMLInputElement>();
 
@@ -23,7 +32,19 @@ export default defineComponent({
       input.value?.focus();
     });
 
-    return { name, input };
+    const enterGame = async () => {
+      if (props.action === 'create') {
+        const gameId = await store.createGame(name.value);
+
+        router.push(`/game/${gameId}`);
+      } else {
+        await store.joinGame(route.params.id as string, name.value);
+
+        router.push(`/game/${route.params.id}`);
+      }
+    };
+
+    return { name, input, enterGame };
   },
 });
 </script>
@@ -39,9 +60,9 @@ export default defineComponent({
         required
         v-model.trim="name"
         @blur="input?.focus()"
-        @keydown.enter="$emit('submit', name)"
+        @keydown.enter="enterGame"
       />
-      <NButton @click.once="$emit('submit', name)">Go!</NButton>
+      <NButton @click.once="enterGame">Go!</NButton>
     </NMain>
   </div>
 </template>

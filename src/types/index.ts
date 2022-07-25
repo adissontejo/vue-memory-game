@@ -4,7 +4,7 @@ export type Player = {
   score: 0;
 };
 
-export type Game = {
-  id: string;
-  players: Player[];
+export type Card = {
+  color: string;
+  found: boolean;
 };
