@@ -99,6 +99,7 @@ export default defineComponent({
       flex-wrap: wrap;
 
       > li {
+        white-space: nowrap;
         text-overflow: ellipsis;
       }
     }

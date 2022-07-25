@@ -11,6 +11,7 @@
     "@mdi/font": "5.9.55",
     "core-js": "^3.8.3",
     "firebase": "^9.9.1",
+    "gsap": "^3.10.4",
     "pinia": "^2.0.16",
     "vue": "^3.2.13",
     "vue-inline-svg": "^3.1.0",
@@ -19,6 +20,7 @@
   },
   "devDependencies": {
     "@types/firebase": "^3.2.1",
+    "@types/gsap": "^3.0.0",
     "@typescript-eslint/eslint-plugin": "^5.4.0",
     "@typescript-eslint/parser": "^5.4.0",
     "@vue/cli-plugin-babel": "~5.0.0",

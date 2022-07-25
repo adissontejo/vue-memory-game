@@ -1,6 +1,6 @@
-import { child, get, onValue, push, remove, set } from '@firebase/database';
+import { child, onValue, push, remove, set } from '@firebase/database';
 
-import { GameState, Player } from '@/types';
+import { GameState } from '@/types';
 import { getMemoryCardsList } from '@/utils';
 
 import { games } from './base';

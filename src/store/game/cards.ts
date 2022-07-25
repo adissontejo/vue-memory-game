@@ -65,20 +65,14 @@ export const useCards = (
     return false;
   };
 
-  watch(gameId, () => {
-    if (!gameId.value) {
+  watch(gameState, () => {
+    if (!gameId.value || gameState.value !== 'in-progress') {
       return;
     }
 
     onCards(gameId.value, data => {
       cards.value = data;
     });
-  });
-
-  watch(gameState, () => {
-    if (!gameId.value || gameState.value !== 'in-progress') {
-      return;
-    }
 
     onSelectedCards(gameId.value, data => {
       selectedCards.value = data;

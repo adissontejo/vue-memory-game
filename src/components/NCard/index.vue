@@ -1,6 +1,5 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { useStore } from 'vuex';
 
 import image from '@/assets/question-mark.svg';
 
@@ -22,12 +21,14 @@ export default defineComponent({
 
 <template>
   <button class="container">
-    <div class="front" :class="{ hidden: !shown }"></div>
-    <div class="back" :class="{ hidden: shown }">
-      <div>
-        <img :src="image" />
+    <Transition name="flip">
+      <div v-if="shown" class="front flip"></div>
+      <div v-else class="back flip">
+        <div>
+          <img :src="image" />
+        </div>
       </div>
-    </div>
+    </Transition>
   </button>
 </template>
 
@@ -35,8 +36,8 @@ export default defineComponent({
 .container {
   position: relative;
 
-  width: 150px;
-  height: 150px;
+  width: 130px;
+  height: 130px;
   perspective: 1000px;
 
   cursor: pointer;
@@ -49,32 +50,6 @@ export default defineComponent({
     .front,
     .back {
       box-shadow: 10px 10px 8px 0 rgba(0, 0, 0, 0.4);
-    }
-  }
-
-  > .front {
-    background: v-bind(color);
-  }
-
-  > .back {
-    padding: 15px;
-
-    background: $primary-color;
-
-    > div {
-      width: 100%;
-      height: 100%;
-      border: 1px solid $accent-color;
-      border-radius: 10px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      > img {
-        width: 50px;
-        height: 50px;
-      }
     }
   }
 
@@ -92,14 +67,42 @@ export default defineComponent({
 
     transform-style: preserve-3d;
     transition: box-shadow 0.3s, transform 0.7s;
+  }
 
-    &.hidden {
-      transform: rotateY(180deg);
+  > .front {
+    background: v-bind(color);
+
+    &.flip-enter-from,
+    &.flip-leave-to {
+      transform: rotateY(-180deg);
     }
   }
 
-  > .back:not(.hidden) {
-    transform: rotateY(360deg);
+  > .back {
+    padding: 15px;
+
+    background: $primary-color;
+
+    &.flip-enter-from,
+    &.flip-leave-to {
+      transform: rotateY(180deg);
+    }
+
+    > div {
+      width: 100%;
+      height: 100%;
+      border: 1px solid $accent-color;
+      border-radius: 10px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      > img {
+        width: 50px;
+        height: 50px;
+      }
+    }
   }
 }
 </style>
