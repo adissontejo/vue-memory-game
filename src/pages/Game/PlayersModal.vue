@@ -17,7 +17,7 @@ export default defineComponent({
   setup() {
     const store = useGameStore();
 
-    const { player, players, state } = storeToRefs(store);
+    const { player, players, gameState } = storeToRefs(store);
 
     const { startGame } = store;
 
@@ -25,7 +25,7 @@ export default defineComponent({
       startImg,
       player,
       players,
-      state,
+      gameState,
       startGame,
     };
   },
@@ -33,7 +33,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div v-if="state === 'waiting'" class="players-modal">
+  <div v-if="gameState === 'waiting'" class="players-modal">
     <div class="wrapper">
       <h2>Players</h2>
       <ul>
@@ -42,7 +42,7 @@ export default defineComponent({
         </li>
       </ul>
       <NButton
-        v-if="player.created && players.length > 1"
+        v-if="player.creator && players.length > 1"
         svg
         class="button"
         :src="startImg"
@@ -50,7 +50,7 @@ export default defineComponent({
       >
         Start game
       </NButton>
-      <p v-else-if="!player.created" class="wait">
+      <p v-else-if="!player.creator" class="wait">
         Wait for the host to start the game
       </p>
       <p v-else class="wait">Wait for more players to join</p>

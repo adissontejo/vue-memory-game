@@ -4,10 +4,7 @@ import { Card } from '@/types';
 
 import { games } from './base';
 
-export const onCardsAdded = (
-  gameId: string,
-  callback: (cards: Card[]) => void
-) => {
+export const onCards = (gameId: string, callback: (cards: Card[]) => void) => {
   const game = child(games, `/-${gameId}`);
 
   const cards = child(game, '/cards');
@@ -29,7 +26,7 @@ export const onCardsAdded = (
   );
 };
 
-export const selectCard = async (gameId: string, cardIndex: number) => {
+export const pushSelectedCard = async (gameId: string, cardIndex: number) => {
   const game = child(games, `/-${gameId}`);
 
   const selected = child(game, '/selected');
@@ -39,7 +36,7 @@ export const selectCard = async (gameId: string, cardIndex: number) => {
   await set(card, true);
 };
 
-export const onCardSelected = (
+export const onSelectedCardAdded = (
   gameId: string,
   callback: (cardIndex: number) => void
 ) => {

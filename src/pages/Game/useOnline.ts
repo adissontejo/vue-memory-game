@@ -13,7 +13,7 @@ export const useOnline = () => {
 
   const local = useLocal();
 
-  const { cards, selected } = storeToRefs(store);
+  const { cards, selectedCards } = storeToRefs(store);
 
   const { selectCard } = store;
 
@@ -31,14 +31,14 @@ export const useOnline = () => {
     });
   });
 
-  onBeforeRouteLeave(() => {
-    store.leaveGame();
+  onBeforeRouteLeave(async () => {
+    await store.leaveGame();
   });
 
   return {
     ...local,
     cards,
-    selected,
+    selectedCards,
     selectCard,
   };
 };

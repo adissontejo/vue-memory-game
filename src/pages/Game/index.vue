@@ -24,8 +24,8 @@ export default defineComponent({
     const data = online ? useOnline() : useLocal();
 
     const cardShown = computed(() => {
-      return data.cards.value.map((item, index) => {
-        return data.selected.value.includes(index) || item.found;
+      return data.cards?.value.map((item, index) => {
+        return data.selectedCards.value.includes(index) || item.found;
       });
     });
 

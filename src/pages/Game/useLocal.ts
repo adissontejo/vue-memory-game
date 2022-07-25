@@ -4,38 +4,41 @@ import { getMemoryCardsList } from '@/utils';
 
 export const useLocal = () => {
   const cards = ref(getMemoryCardsList());
-  const selected = ref<number[]>([]);
+  const selectedCards = ref<number[]>([]);
   const attempts = ref(0);
 
   const selectCard = (index: number) => {
-    if (selected.value.includes(index) || selected.value.length === 2) {
+    if (
+      selectedCards.value.includes(index) ||
+      selectedCards.value.length === 2
+    ) {
       return;
     }
 
-    selected.value.push(index);
+    selectedCards.value.push(index);
 
-    if (selected.value.length === 2) {
+    if (selectedCards.value.length === 2) {
       attempts.value++;
 
-      const cardA = cards.value[selected.value[0]];
-      const cardB = cards.value[selected.value[1]];
+      const cardA = cards.value[selectedCards.value[0]];
+      const cardB = cards.value[selectedCards.value[1]];
 
       if (cardA.color !== cardB.color) {
         setTimeout(() => {
-          selected.value = [];
+          selectedCards.value = [];
         }, 1000);
       } else {
         cardA.found = true;
         cardB.found = true;
 
-        selected.value = [];
+        selectedCards.value = [];
       }
     }
   };
 
   return {
     cards,
-    selected,
+    selectedCards,
     attempts,
     selectCard,
   };
