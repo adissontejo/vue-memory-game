@@ -17,7 +17,7 @@ export const useOnline = () => {
 
   const { nextRound } = store;
 
-  watch(selectedCards, () => {
+  watch(selectedCards, async () => {
     if (selectedCards.value.length !== 2) {
       return;
     }
@@ -26,7 +26,7 @@ export const useOnline = () => {
       return;
     }
 
-    nextRound();
+    await nextRound();
   });
 
   onBeforeMount(() => {
@@ -41,9 +41,9 @@ export const useOnline = () => {
     await store.leaveGame();
   });
 
-  const selectCard = (cardIndex: number) => {
+  const selectCard = async (cardIndex: number) => {
     if (player.value.id === playingNow.value?.id) {
-      store.selectCard(cardIndex);
+      await store.selectCard(cardIndex);
     }
   };
 

@@ -1,6 +1,6 @@
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 
-import { getMemoryCardsList } from '@/utils';
+import { getMemoryCardsList, sfx } from '@/utils';
 
 export const useLocal = () => {
   const cards = ref(getMemoryCardsList());
@@ -14,6 +14,8 @@ export const useLocal = () => {
     ) {
       return;
     }
+
+    sfx.flip();
 
     selectedCards.value.push(index);
 
@@ -31,7 +33,11 @@ export const useLocal = () => {
         cardA.found = true;
         cardB.found = true;
 
-        selectedCards.value = [];
+        setTimeout(() => {
+          selectedCards.value = [];
+
+          sfx.hit();
+        }, 200);
       }
     }
   };

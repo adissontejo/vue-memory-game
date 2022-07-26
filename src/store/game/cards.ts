@@ -8,6 +8,7 @@ import {
   setSelectedCards,
 } from '@/services/games';
 import { Card, GameState } from '@/types';
+import { sfx } from '@/utils';
 
 export const useCards = (
   gameId: Ref<string | null>,
@@ -82,6 +83,10 @@ export const useCards = (
     });
 
     onSelectedCards(gameId.value, data => {
+      if (selectedCards.value.length < data.length) {
+        sfx.flip();
+      }
+
       selectedCards.value = data;
     });
 

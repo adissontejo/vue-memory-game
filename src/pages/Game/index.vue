@@ -1,17 +1,12 @@
 <script lang="ts">
-import {
-  computed,
-  defineComponent,
-  onMounted,
-  ref,
-  RendererElement,
-} from 'vue';
+import { computed, defineComponent, ref, RendererElement } from 'vue';
 import { useRoute } from 'vue-router';
 import { gsap } from 'gsap';
 import Flip from 'gsap/Flip';
 
 import { NCard } from '@/components';
 import { Player } from '@/types';
+import { sfx } from '@/utils';
 
 import PlayersModal from './PlayersModal.vue';
 import FinalScore from './FinalScore.vue';
@@ -62,6 +57,7 @@ export default defineComponent({
       Flip.from(state, {
         delay: 0.2 + el.dataset.index * 0.1,
         duration: 0.3,
+        onStart: () => sfx.flip(),
         onComplete: () => done(),
       });
     };

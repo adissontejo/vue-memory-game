@@ -9,6 +9,7 @@ import {
   setTurn,
 } from '@/services/games';
 import { Player } from '@/types';
+import { sfx } from '@/utils';
 
 export const usePlayers = (
   gameId: Ref<string | null>,
@@ -78,6 +79,8 @@ export const usePlayers = (
       const playerIndex = players.value.findIndex(item => item.id === playerId);
 
       players.value[playerIndex].score = score;
+
+      sfx.hit();
     });
   });
 
