@@ -31,7 +31,7 @@ export default defineComponent({
         return;
       }
 
-      players.value = store.players.sort((a, b) => a.score - b.score);
+      players.value = store.players.sort((a, b) => b.score - a.score);
     });
 
     return {
