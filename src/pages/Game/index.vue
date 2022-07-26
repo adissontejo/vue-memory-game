@@ -16,6 +16,7 @@ import PlayersModal from './PlayersModal.vue';
 import { useLocal } from './useLocal';
 import { useOnline } from './useOnline';
 import { Player } from '@/types';
+import { cards } from '@/data';
 
 gsap.registerPlugin(Flip);
 
@@ -33,6 +34,8 @@ export default defineComponent({
     const online = !!route.params.id;
 
     const data = online ? useOnline() : useLocal();
+
+    const interaction = ref(false);
 
     const cardShown = computed(() => {
       return data.cards?.value.map((item, index) => {
@@ -56,18 +59,26 @@ export default defineComponent({
       });
 
       Flip.from(state, {
-        delay: el.dataset.index * 0.1,
+        delay: 0.5 + el.dataset.index * 0.1,
         duration: 0.3,
         onComplete: () => done(),
       });
+    };
+
+    const afterEnter = (el: RendererElement) => {
+      if (parseInt(el.dataset.index) === data.cards.value.length - 1) {
+        interaction.value = true;
+      }
     };
 
     return {
       playingNow: {} as Player,
       online,
       cardShown,
+      interaction,
       beforeEnter,
       enter,
+      afterEnter,
       ...data,
     };
   },
@@ -87,17 +98,19 @@ export default defineComponent({
         :appear="true"
         @before-enter="beforeEnter"
         @enter="enter"
+        @after-enter="afterEnter"
       >
         <div
           v-for="(card, index) in cards"
           class="card"
           :key="index"
           :data-index="index"
+          :style="{ zIndex: index === 0 ? 1 : 0 }"
         >
           <NCard
             :color="card.color"
             :shown="cardShown[index]"
-            @click="selectCard(index)"
+            @click="interaction && selectCard(index)"
           />
         </div>
       </TransitionGroup>
@@ -108,7 +121,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .game {
-  padding: 30px;
+  padding: 30px 20px;
 
   width: 100vw;
 
@@ -125,12 +138,23 @@ export default defineComponent({
   > main {
     position: relative;
 
-    width: 100%;
+    margin: 35px 0 0;
+
+    min-width: fit-content;
+    max-width: min(100%, 1140px);
 
     display: grid;
     grid-template-columns: repeat(auto-fill, 130px);
     justify-content: space-between;
-    grid-gap: 10px;
+    grid-gap: 20px;
+
+    @media screen and (max-width: 600px) {
+      grid-template-columns: repeat(auto-fill, 100px);
+    }
+  }
+
+  .card {
+    box-shadow: none;
   }
 }
 </style>

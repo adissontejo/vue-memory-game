@@ -44,6 +44,11 @@ export default defineComponent({
 
   transition: all 0.3s;
 
+  @media screen and (max-width: 600px) {
+    width: 100px;
+    height: 100px;
+  }
+
   &:hover {
     transform: scale(1.1);
 
@@ -79,9 +84,13 @@ export default defineComponent({
   }
 
   > .back {
-    padding: 15px;
+    padding: 10px;
 
     background: $primary-color;
+
+    @media screen and (max-width: 600px) {
+      padding: 10px;
+    }
 
     &.flip-enter-from,
     &.flip-leave-to {
@@ -101,6 +110,11 @@ export default defineComponent({
       > img {
         width: 50px;
         height: 50px;
+
+        @media screen and (max-width: 600px) {
+          width: 35px;
+          height: 35px;
+        }
       }
     }
   }
