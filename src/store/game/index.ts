@@ -32,6 +32,14 @@ export const useGameStore = defineStore('game', () => {
     });
   });
 
+  watch(cardStore.cardsLefting, async value => {
+    if (!gameId.value || value !== 0) {
+      return;
+    }
+
+    await setGameState(gameId.value, 'finished');
+  });
+
   const reset = () => {
     playersStore.reset();
     cardStore.reset();
@@ -97,6 +105,10 @@ export const useGameStore = defineStore('game', () => {
   };
 
   const nextRound = async () => {
+    if (!gameId.value) {
+      return;
+    }
+
     const point = await cardStore.checkPair();
 
     if (point) {

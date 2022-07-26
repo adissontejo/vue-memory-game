@@ -1,4 +1,4 @@
-import { Ref, ref, watch } from 'vue';
+import { computed, Ref, ref, watch } from 'vue';
 
 import {
   onCardFound,
@@ -16,6 +16,10 @@ export const useCards = (
   const cards = ref<Card[]>([]);
   const selectedCards = ref<number[]>([]);
 
+  const cardsLefting = computed(() => {
+    return cards.value.filter(item => !item.found).length;
+  });
+
   const reset = () => {
     cards.value = [];
     selectedCards.value = [];
@@ -26,7 +30,10 @@ export const useCards = (
       return;
     }
 
-    if (selectedCards.value.includes(cardIndex)) {
+    if (
+      selectedCards.value.includes(cardIndex) ||
+      cards.value[cardIndex].found
+    ) {
       return;
     }
 
@@ -85,6 +92,7 @@ export const useCards = (
 
   return {
     cards,
+    cardsLefting,
     selectedCards,
     reset,
     selectCard,

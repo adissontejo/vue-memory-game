@@ -11,12 +11,12 @@ import { gsap } from 'gsap';
 import Flip from 'gsap/Flip';
 
 import { NCard } from '@/components';
+import { Player } from '@/types';
 
 import PlayersModal from './PlayersModal.vue';
+import FinalScore from './FinalScore.vue';
 import { useLocal } from './useLocal';
 import { useOnline } from './useOnline';
-import { Player } from '@/types';
-import { cards } from '@/data';
 
 gsap.registerPlugin(Flip);
 
@@ -26,6 +26,7 @@ export default defineComponent({
   components: {
     NCard,
     PlayersModal,
+    FinalScore,
   },
 
   setup() {
@@ -59,7 +60,7 @@ export default defineComponent({
       });
 
       Flip.from(state, {
-        delay: 0.5 + el.dataset.index * 0.1,
+        delay: 0.2 + el.dataset.index * 0.1,
         duration: 0.3,
         onComplete: () => done(),
       });
@@ -116,6 +117,7 @@ export default defineComponent({
       </TransitionGroup>
     </main>
     <PlayersModal v-if="online" />
+    <FinalScore v-if="online" />
   </div>
 </template>
 

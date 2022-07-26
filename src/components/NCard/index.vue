@@ -25,7 +25,7 @@ export default defineComponent({
       <div v-if="shown" class="front flip"></div>
       <div v-else class="back flip">
         <div>
-          <img :src="image" />
+          <img draggable="false" :src="image" />
         </div>
       </div>
     </Transition>
