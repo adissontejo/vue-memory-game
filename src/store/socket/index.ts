@@ -59,6 +59,12 @@ export const useSocket = defineStore('socket', () => {
     });
   };
 
+  const onPlayerLeft = (callback: (playerId: string) => void) => {
+    on('leave-game', playerId => {
+      callback(playerId);
+    });
+  };
+
   const onGameStarted = (callback: () => void) => {
     on('start-game', callback);
   };
@@ -90,6 +96,7 @@ export const useSocket = defineStore('socket', () => {
     startGame,
     selectCard,
     onPlayerJoined,
+    onPlayerLeft,
     onGameStarted,
     onCardSelected,
     onRightAnswer,

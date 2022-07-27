@@ -17,6 +17,16 @@ export const usePlayers = (gameId: Ref<string | null>) => {
     players.value.push(player);
   });
 
+  socket.onPlayerLeft(playerId => {
+    const index = players.value.findIndex(item => item.id === playerId);
+
+    if (index === -1) {
+      return;
+    }
+
+    players.value.splice(index, 1);
+  });
+
   const update = (game: Game) => {
     players.value = game.players;
     turn.value = game.turn;
