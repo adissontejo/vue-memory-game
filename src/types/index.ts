@@ -7,6 +7,16 @@ export type Player = {
 };
 
 export type Card = {
-  color: string;
+  value: string;
   found: boolean;
+};
+
+export type Game = {
+  id: string;
+  creatorId: string;
+  players: Player[];
+  cards: Card[];
+  state: GameState;
+  turn: string;
+  selectedCards: number[];
 };

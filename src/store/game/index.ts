@@ -1,97 +1,75 @@
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { defineStore } from 'pinia';
 
-import {
-  onGameState,
-  pushGame,
-  pushPlayer,
-  removePlayer,
-  setGameState,
-  setTurn,
-} from '@/services/games';
+import { useSocket } from '@/store/socket';
 import { GameState, Player } from '@/types';
 
 import { useCards } from './cards';
 import { usePlayers } from './players';
 
 export const useGameStore = defineStore('game', () => {
+  const socket = useSocket();
+
   const gameId = ref<string | null>(null);
   const gameState = ref<GameState>('waiting');
   const player = ref<Partial<Player & { creator: boolean }>>({});
 
-  const playersStore = usePlayers(gameId, gameState);
-  const cardStore = useCards(gameId, gameState);
+  const playersStore = usePlayers(gameId);
+  const cardStore = useCards(gameId);
 
-  watch(gameId, () => {
-    if (!gameId.value) {
-      return;
-    }
-
-    onGameState(gameId.value, state => {
-      gameState.value = state;
-    });
+  socket.onGameStarted(() => {
+    gameState.value = 'in-progress';
   });
 
-  watch(cardStore.cardsLefting, async value => {
-    if (!gameId.value || value !== 0) {
-      return;
-    }
-
-    await setGameState(gameId.value, 'finished');
+  socket.onRightAnswer((player, cards) => {
+    playersStore.incrementScore(player);
+    cardStore.findPair(cards[0], cards[1]);
   });
 
-  const reset = () => {
-    playersStore.reset();
-    cardStore.reset();
+  socket.onWrongAnswer(turn => {
+    setTimeout(() => {
+      playersStore.turn.value = turn;
+      cardStore.emptySelection();
+    }, 1000);
+  });
 
-    gameId.value = null;
-    gameState.value = 'waiting';
-    player.value = {};
-  };
+  socket.onGameFinished(() => {
+    setTimeout(() => {
+      gameState.value = 'finished';
+    }, 500);
+  });
 
   const createGame = async (creatorName: string) => {
-    const data = await pushGame(creatorName);
+    const game = await socket.createGame(creatorName);
 
-    if (!data.gameId || !data.creatorId) {
-      return null;
-    }
-
-    gameId.value = data.gameId;
-
+    gameId.value = game.id;
+    gameState.value = game.state;
     player.value = {
-      id: data.creatorId,
-      name: creatorName,
-      score: 0,
+      ...game.players[0],
       creator: true,
     };
 
-    return data.gameId;
+    playersStore.update(game);
+    cardStore.update(game);
+
+    return game.id;
   };
 
   const joinGame = async (id: string, playerName: string) => {
-    const playerId = await pushPlayer(id, playerName);
+    const response = await socket.joinGame(id, playerName);
 
-    if (!playerId) {
-      return;
-    }
+    gameId.value = response.game.id;
+    gameState.value = response.game.state;
+    player.value = response.player;
 
-    gameId.value = id;
-
-    player.value = {
-      id: playerId,
-      name: playerName,
-      score: 0,
-    };
+    playersStore.update(response.game);
+    cardStore.update(response.game);
   };
 
   const leaveGame = async () => {
     if (!gameId.value || !player.value?.id) {
       return;
     }
-
-    await removePlayer(gameId.value, player.value.id);
-
-    reset();
   };
 
   const startGame = async () => {
@@ -99,23 +77,7 @@ export const useGameStore = defineStore('game', () => {
       return;
     }
 
-    await setGameState(gameId.value, 'in-progress');
-
-    await setTurn(gameId.value, player.value.id);
-  };
-
-  const nextRound = async () => {
-    if (!gameId.value) {
-      return;
-    }
-
-    const point = await cardStore.checkPair();
-
-    if (point) {
-      await playersStore.incrementScore();
-    } else {
-      await playersStore.nextPlayer();
-    }
+    socket.startGame(gameId.value);
   };
 
   return {
@@ -124,11 +86,9 @@ export const useGameStore = defineStore('game', () => {
     player,
     ...playersStore,
     ...cardStore,
-    reset,
     createGame,
     joinGame,
     leaveGame,
     startGame,
-    nextRound,
   };
 });

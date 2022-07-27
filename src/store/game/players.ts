@@ -1,20 +1,11 @@
-import { computed, Ref, ref, watch } from 'vue';
+import { computed, Ref, ref } from 'vue';
 
-import {
-  onPlayerAdded,
-  onPlayerRemoved,
-  onPlayerScoreChanged,
-  onTurn,
-  setPlayerScore,
-  setTurn,
-} from '@/services/games';
-import { Player } from '@/types';
-import { sfx } from '@/utils';
+import { useSocket } from '@/store/socket';
+import { Game, Player } from '@/types';
 
-export const usePlayers = (
-  gameId: Ref<string | null>,
-  gameState: Ref<string>
-) => {
+export const usePlayers = (gameId: Ref<string | null>) => {
+  const socket = useSocket();
+
   const players = ref<Player[]>([]);
   const turn = ref<string>('');
 
@@ -22,74 +13,30 @@ export const usePlayers = (
     return players.value.find(item => item.id === turn.value);
   });
 
-  const reset = () => {
-    players.value = [];
+  socket.onPlayerJoined(player => {
+    players.value.push(player);
+  });
+
+  const update = (game: Game) => {
+    players.value = game.players;
+    turn.value = game.turn;
   };
 
-  const nextPlayer = async () => {
+  const incrementScore = async (id: string) => {
     if (!gameId.value) {
       return;
     }
 
-    const current = players.value.findIndex(item => turn.value === item.id);
+    const playerIndex = players.value.findIndex(item => item.id === id);
 
-    const next = (current + 1) % players.value.length;
-
-    await setTurn(gameId.value, players.value[next].id);
+    players.value[playerIndex].score++;
   };
-
-  const incrementScore = async () => {
-    if (!gameId.value || !playingNow.value) {
-      return;
-    }
-
-    await setPlayerScore(
-      gameId.value,
-      playingNow.value.id,
-      playingNow.value.score + 1
-    );
-  };
-
-  watch(gameId, () => {
-    if (!gameId.value) {
-      return;
-    }
-
-    onPlayerAdded(gameId.value, data => {
-      players.value.push(data);
-    });
-
-    onPlayerRemoved(gameId.value, id => {
-      const playerIndex = players.value.findIndex(item => item.id === id);
-
-      players.value.splice(playerIndex, 1);
-    });
-  });
-
-  watch(gameState, () => {
-    if (!gameId.value || gameState.value !== 'in-progress') {
-      return;
-    }
-
-    onTurn(gameId.value, playerId => {
-      turn.value = playerId;
-    });
-
-    onPlayerScoreChanged(gameId.value, (playerId, score) => {
-      const playerIndex = players.value.findIndex(item => item.id === playerId);
-
-      players.value[playerIndex].score = score;
-
-      sfx.hit();
-    });
-  });
 
   return {
     players,
     playingNow,
     turn,
-    reset,
-    nextPlayer,
+    update,
     incrementScore,
   };
 };

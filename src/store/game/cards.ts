@@ -1,19 +1,12 @@
-import { computed, Ref, ref, watch } from 'vue';
+import { computed, Ref, ref } from 'vue';
 
-import {
-  onCardFound,
-  onCards,
-  onSelectedCards,
-  setCardFound,
-  setSelectedCards,
-} from '@/services/games';
-import { Card, GameState } from '@/types';
+import { useSocket } from '@/store/socket';
+import { Card, Game } from '@/types';
 import { sfx } from '@/utils';
 
-export const useCards = (
-  gameId: Ref<string | null>,
-  gameState: Ref<GameState>
-) => {
+export const useCards = (gameId: Ref<string | null>) => {
+  const socket = useSocket();
+
   const cards = ref<Card[]>([]);
   const selectedCards = ref<number[]>([]);
 
@@ -21,12 +14,18 @@ export const useCards = (
     return cards.value.filter(item => !item.found).length;
   });
 
-  const reset = () => {
-    cards.value = [];
-    selectedCards.value = [];
+  socket.onCardSelected(cardIndex => {
+    sfx.flip();
+
+    selectedCards.value.push(cardIndex);
+  });
+
+  const update = (game: Game) => {
+    cards.value = game.cards;
+    selectedCards.value = game.selectedCards;
   };
 
-  const selectCard = async (cardIndex: number) => {
+  const selectCard = (cardIndex: number) => {
     if (!gameId.value || selectedCards.value.length >= 2) {
       return;
     }
@@ -38,69 +37,27 @@ export const useCards = (
       return;
     }
 
-    await setSelectedCards(gameId.value, [...selectedCards.value, cardIndex]);
+    socket.selectCard(gameId.value, cardIndex);
   };
 
-  const checkPair = async () => {
-    if (!gameId.value) {
-      return;
-    }
-
-    const cardA = selectedCards.value[0];
-    const cardB = selectedCards.value[1];
-
-    if (cards.value[cardA].color === cards.value[cardB].color) {
-      await setCardFound(gameId.value, cardA);
-      await setCardFound(gameId.value, cardB);
-
-      await setSelectedCards(gameId.value, []);
-
-      return true;
-    }
-
-    await new Promise<void>(resolve => {
-      setTimeout(async () => {
-        if (!gameId.value) {
-          return;
-        }
-
-        await setSelectedCards(gameId.value, []);
-
-        resolve();
-      }, 500);
-    });
-
-    return false;
+  const emptySelection = () => {
+    selectedCards.value = [];
   };
 
-  watch(gameState, () => {
-    if (!gameId.value || gameState.value !== 'in-progress') {
-      return;
-    }
+  const findPair = (cardA: number, cardB: number) => {
+    cards.value[cardA].found = true;
+    cards.value[cardB].found = true;
 
-    onCards(gameId.value, data => {
-      cards.value = data;
-    });
-
-    onSelectedCards(gameId.value, data => {
-      if (selectedCards.value.length < data.length) {
-        sfx.flip();
-      }
-
-      selectedCards.value = data;
-    });
-
-    onCardFound(gameId.value, cardIndex => {
-      cards.value[cardIndex].found = true;
-    });
-  });
+    emptySelection();
+  };
 
   return {
     cards,
     cardsLefting,
     selectedCards,
-    reset,
+    update,
+    emptySelection,
     selectCard,
-    checkPair,
+    findPair,
   };
 };

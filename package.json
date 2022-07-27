@@ -10,7 +10,6 @@
   "dependencies": {
     "@mdi/font": "5.9.55",
     "core-js": "^3.8.3",
-    "firebase": "^9.9.1",
     "gsap": "^3.10.4",
     "pinia": "^2.0.16",
     "socket.io-client": "^4.5.1",

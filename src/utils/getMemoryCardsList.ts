@@ -15,7 +15,7 @@ export const getMemoryCardsList = () => {
     const [card] = available.splice(selected, 1);
 
     memoryCards.push({
-      color: card,
+      value: card,
       found: false,
     });
   }

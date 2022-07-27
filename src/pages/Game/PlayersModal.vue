@@ -63,6 +63,7 @@ export default defineComponent({
   position: fixed;
   top: 0;
   left: 0;
+  z-index: 10;
 
   padding: 20px;
 

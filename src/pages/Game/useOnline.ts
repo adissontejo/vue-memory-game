@@ -13,21 +13,8 @@ export const useOnline = () => {
 
   const local = useLocal();
 
-  const { player, playingNow, cards, selectedCards } = storeToRefs(store);
-
-  const { nextRound } = store;
-
-  watch(selectedCards, async () => {
-    if (selectedCards.value.length !== 2) {
-      return;
-    }
-
-    if (player.value.id !== playingNow.value?.id) {
-      return;
-    }
-
-    await nextRound();
-  });
+  const { gameState, player, playingNow, cards, selectedCards } =
+    storeToRefs(store);
 
   onBeforeMount(() => {
     if (!store.player.id) {
@@ -43,12 +30,13 @@ export const useOnline = () => {
 
   const selectCard = async (cardIndex: number) => {
     if (player.value.id === playingNow.value?.id) {
-      await store.selectCard(cardIndex);
+      store.selectCard(cardIndex);
     }
   };
 
   return {
     ...local,
+    gameState,
     cards,
     selectedCards,
     playingNow,

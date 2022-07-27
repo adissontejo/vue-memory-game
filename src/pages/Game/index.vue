@@ -98,6 +98,7 @@ export default defineComponent({
         @after-enter="afterEnter"
       >
         <div
+          v-if="gameState !== 'waiting'"
           v-for="(card, index) in cards"
           class="card"
           :key="index"
@@ -105,7 +106,7 @@ export default defineComponent({
           :style="{ zIndex: index === 0 ? 1 : 0 }"
         >
           <NCard
-            :color="card.color"
+            :color="card.value"
             :shown="cardShown[index]"
             @click="interaction && selectCard(index)"
           />
