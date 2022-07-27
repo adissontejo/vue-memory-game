@@ -15,6 +15,10 @@ export const useCards = (gameId: Ref<string | null>) => {
   });
 
   socket.onCardSelected(cardIndex => {
+    if (selectedCards.value.includes(cardIndex)) {
+      return;
+    }
+
     sfx.flip();
 
     selectedCards.value.push(cardIndex);
@@ -36,6 +40,10 @@ export const useCards = (gameId: Ref<string | null>) => {
     ) {
       return;
     }
+
+    sfx.flip();
+
+    selectedCards.value.push(cardIndex);
 
     socket.selectCard(gameId.value, cardIndex);
   };
