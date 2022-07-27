@@ -14,29 +14,35 @@ export default defineComponent({
   },
 
   setup() {
+    console.log('in');
+
     const store = useGameStore();
 
-    const { gameState, cardsLefting } = storeToRefs(store);
+    const { gameState } = storeToRefs(store);
 
-    const players = ref<Player[]>([]);
+    let playersWithoutReactive = Array.from(store.players);
 
-    const best = computed(() => players.value[0]);
-
-    const draw = computed(() => {
-      return players.value[1]?.score === best.value?.score;
-    });
-
-    watch(cardsLefting, () => {
-      if (cardsLefting.value !== 0) {
-        return;
+    const playersByScore = computed(() => {
+      if (gameState.value !== 'finished') {
+        return [];
       }
 
-      players.value = store.players.sort((a, b) => b.score - a.score);
+      return playersWithoutReactive.sort((a, b) => b.score - a.score);
+    });
+
+    const best = computed(() => playersByScore.value[0]);
+
+    const draw = computed(() => {
+      return playersByScore.value[1]?.score === best.value?.score;
+    });
+
+    watch(store.players, () => {
+      playersWithoutReactive = Array.from(store.players);
     });
 
     return {
       gameState,
-      players,
+      playersByScore,
       best,
       draw,
     };
@@ -55,7 +61,7 @@ export default defineComponent({
         <span class="score">Score</span>
       </div>
       <ol>
-        <li v-for="item in players">
+        <li v-for="item in playersByScore">
           <div class="line">
             <span class="player">{{ item.name }}</span>
             <span class="score">{{ item.score }}</span>

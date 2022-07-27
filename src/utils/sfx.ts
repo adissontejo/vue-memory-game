@@ -4,7 +4,9 @@ import hit from '@/assets/audio/hit.mp3';
 export const playSFX = (src?: string) => {
   const audio = new Audio(src);
 
-  audio.autoplay = true;
+  audio.volume = 0.5;
+
+  audio.play();
 };
 
 export const sfx = {

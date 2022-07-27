@@ -12,7 +12,8 @@ export const useLocal = () => {
   const selectCard = (index: number) => {
     if (
       selectedCards.value.includes(index) ||
-      selectedCards.value.length === 2
+      selectedCards.value.length === 2 ||
+      cards.value[index].found
     ) {
       return;
     }

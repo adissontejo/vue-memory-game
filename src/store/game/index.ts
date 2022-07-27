@@ -3,6 +3,7 @@ import { defineStore } from 'pinia';
 
 import { useSocket } from '@/store/socket';
 import { GameState, Player } from '@/types';
+import { sfx } from '@/utils';
 
 import { useCards } from './cards';
 import { usePlayers } from './players';
@@ -22,6 +23,8 @@ export const useGameStore = defineStore('game', () => {
   });
 
   socket.onRightAnswer((player, cards) => {
+    sfx.hit();
+
     playersStore.incrementScore(player);
     cardStore.findPair(cards[0], cards[1]);
   });
